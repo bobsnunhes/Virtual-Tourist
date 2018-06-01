@@ -8,12 +8,15 @@
 
 import UIKit
 import MapKit
+import CoreData
 
 class MapViewController: UIViewController {
     
     @IBOutlet weak var mapView: MKMapView!
 
     var dataController : DataController!
+    
+    var fetchedResultsController : NSFetchedResultsController<Pin>!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -23,8 +26,39 @@ class MapViewController: UIViewController {
         centerMapOnLocation(location: initialLocation)
         
         addLongGestureRecognizer()
+        
+        setupFetchedResultsController()
+        
+        loadMapData()
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        setupFetchedResultsController()
+    }
+    
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        
+        fetchedResultsController = nil
+    }
+    
+    func setupFetchedResultsController() {
+        let fetchRequest : NSFetchRequest<Pin> = Pin.fetchRequest()
+        let sortDescriptor = NSSortDescriptor(key: "creationDate", ascending: false)
+        fetchRequest.sortDescriptors = [sortDescriptor]
+        
+        fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: dataController.viewContext, sectionNameKeyPath: nil, cacheName: "pins")
+        
+        fetchedResultsController.delegate = self
+        
+        do {
+            try fetchedResultsController.performFetch()
+        } catch {
+            fatalError("The fecth could not be performed: \(error.localizedDescription)")
+        }
+    }
     
     func centerMapOnLocation(location: CLLocation) {
         let regionRadius : CLLocationDistance = 1000
@@ -34,7 +68,7 @@ class MapViewController: UIViewController {
     
     fileprivate func addLongGestureRecognizer() {
         let longGestureRecognizer = UILongPressGestureRecognizer(target: self, action: #selector(addAnnotation))
-        longGestureRecognizer.minimumPressDuration = 2.0
+        longGestureRecognizer.minimumPressDuration = 1.5
         
         mapView.addGestureRecognizer(longGestureRecognizer)
     }
@@ -44,16 +78,38 @@ class MapViewController: UIViewController {
             let touchPoint = gestureRecognizer.location(in: mapView)
             let newCoordinates = mapView.convert(touchPoint, toCoordinateFrom: mapView)
             
-            let virtualTourist = VirtualTourist(context: dataController.viewContext)
-            virtualTourist.latitude = newCoordinates.latitude
-            virtualTourist.longitude = newCoordinates.longitude
-            virtualTourist.creationDate = Date()
+            let pin = Pin(context: dataController.viewContext)
+            pin.latitude = newCoordinates.latitude
+            pin.longitude = newCoordinates.longitude
+            pin.creationDate = Date()
             try? dataController.viewContext.save()
-            
+        }
+    }
+    
+    func loadMapData() {
+        for pin in fetchedResultsController.fetchedObjects! {
             let annotation = MKPointAnnotation()
-            annotation.coordinate = newCoordinates
+            annotation.coordinate.latitude = pin.latitude
+            annotation.coordinate.longitude = pin.longitude
             mapView.addAnnotation(annotation)
-            
+        }
+    }
+}
+
+extension MapViewController : NSFetchedResultsControllerDelegate {
+    func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange anObject: Any, at indexPath: IndexPath?, for type: NSFetchedResultsChangeType, newIndexPath: IndexPath?) {
+        switch type {
+        case .insert:
+            let pin = fetchedResultsController.object(at: newIndexPath!)
+            let annotation = MKPointAnnotation()
+            annotation.coordinate.latitude = pin.latitude
+            annotation.coordinate.longitude = pin.longitude
+            mapView.addAnnotation(annotation)
+            break
+        case .delete:
+            break
+        default:
+            ()
         }
     }
     
