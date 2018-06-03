@@ -96,15 +96,18 @@ class MapViewController: UIViewController {
             let annotation = TouristAnnotation()
             annotation.coordinate.latitude = pin.latitude
             annotation.coordinate.longitude = pin.longitude
-            
+            annotation.indexPath = fetchedResultsController.indexPath(forObject: pin)
             mapView.addAnnotation(annotation)
         }
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == photosSegue {
-            if sender == TouristAnnotation {
-                
+            if let touristAnnotation = sender as? TouristAnnotation {
+                if let pinPhotosViewController = segue.destination as? PinPhotosViewController {
+                    pinPhotosViewController.pin = fetchedResultsController.object(at: touristAnnotation.indexPath)
+                    pinPhotosViewController.dataController = dataController
+                }
             }
         }
     }
@@ -113,23 +116,12 @@ class MapViewController: UIViewController {
 //MARK: Map View Delegate
 extension MapViewController : MKMapViewDelegate {
     func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
-        if (view.annotation?.isKind(of: TouristAnnotation.self))! {
-            let touristAnnotation = view.annotation as! TouristAnnotation
+        if let touristAnnotation = view.annotation as? TouristAnnotation {
             
-            mapView.deselectAnnotation(view.annotation, animated: true)
+            mapView.deselectAnnotation(touristAnnotation, animated: true)
             
             performSegue(withIdentifier: photosSegue, sender: touristAnnotation)
         }
-//        if (view.annotation?.isKind(of: TouristAnnotation.self))! {
-//            let touristAnnotation = view.annotation as! TouristAnnotation
-//
-//            print("latitude = \(touristAnnotation.coordinate.latitude)")
-//            print("longitude = \(touristAnnotation.coordinate.longitude)")
-////            print("indexpath item = \(touristAnnotation.indexPath.item)")
-////            print("indexpath row = \(touristAnnotation.indexPath.row)")
-//
-//            mapView.removeAnnotation(touristAnnotation)
-//        }
     }
     
     func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
@@ -153,6 +145,7 @@ extension MapViewController : NSFetchedResultsControllerDelegate {
         switch type {
         case .insert:
             if let pin = controller.object(at: newIndexPath!) as? Pin {
+                let indexPath = fetchedResultsController.indexPath(forObject: pin)
                 let annotation = TouristAnnotation()
                 annotation.coordinate.latitude = pin.latitude
                 annotation.coordinate.longitude = pin.longitude
