@@ -18,10 +18,16 @@ class MapViewController: UIViewController {
     
     var fetchedResultsController : NSFetchedResultsController<Pin>!
     
+    let photosSegue = "photosSegue"
+    
+    let pinID = "pin"
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
         let initialLocation = CLLocation(latitude: 21.282778, longitude: -157.829444)
+        
+        mapView.delegate = self
     
         centerMapOnLocation(location: initialLocation)
         
@@ -46,7 +52,7 @@ class MapViewController: UIViewController {
     
     func setupFetchedResultsController() {
         let fetchRequest : NSFetchRequest<Pin> = Pin.fetchRequest()
-        let sortDescriptor = NSSortDescriptor(key: "creationDate", ascending: false)
+        let sortDescriptor = NSSortDescriptor(key: "latitude", ascending: false)
         fetchRequest.sortDescriptors = [sortDescriptor]
         
         fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: dataController.viewContext, sectionNameKeyPath: nil, cacheName: "pins")
@@ -68,7 +74,7 @@ class MapViewController: UIViewController {
     
     fileprivate func addLongGestureRecognizer() {
         let longGestureRecognizer = UILongPressGestureRecognizer(target: self, action: #selector(addAnnotation))
-        longGestureRecognizer.minimumPressDuration = 1.5
+        longGestureRecognizer.minimumPressDuration = 1.0
         
         mapView.addGestureRecognizer(longGestureRecognizer)
     }
@@ -81,30 +87,88 @@ class MapViewController: UIViewController {
             let pin = Pin(context: dataController.viewContext)
             pin.latitude = newCoordinates.latitude
             pin.longitude = newCoordinates.longitude
-            pin.creationDate = Date()
             try? dataController.viewContext.save()
         }
     }
     
     func loadMapData() {
         for pin in fetchedResultsController.fetchedObjects! {
-            let annotation = MKPointAnnotation()
+            let annotation = TouristAnnotation()
             annotation.coordinate.latitude = pin.latitude
             annotation.coordinate.longitude = pin.longitude
+            
             mapView.addAnnotation(annotation)
+        }
+    }
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.identifier == photosSegue {
+            if sender == TouristAnnotation {
+                
+            }
         }
     }
 }
 
+//MARK: Map View Delegate
+extension MapViewController : MKMapViewDelegate {
+    func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
+        if (view.annotation?.isKind(of: TouristAnnotation.self))! {
+            let touristAnnotation = view.annotation as! TouristAnnotation
+            
+            mapView.deselectAnnotation(view.annotation, animated: true)
+            
+            performSegue(withIdentifier: photosSegue, sender: touristAnnotation)
+        }
+//        if (view.annotation?.isKind(of: TouristAnnotation.self))! {
+//            let touristAnnotation = view.annotation as! TouristAnnotation
+//
+//            print("latitude = \(touristAnnotation.coordinate.latitude)")
+//            print("longitude = \(touristAnnotation.coordinate.longitude)")
+////            print("indexpath item = \(touristAnnotation.indexPath.item)")
+////            print("indexpath row = \(touristAnnotation.indexPath.row)")
+//
+//            mapView.removeAnnotation(touristAnnotation)
+//        }
+    }
+    
+    func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
+        if let touristAnnotation = annotation as? TouristAnnotation {
+            var pinAnnotationView = mapView.dequeueReusableAnnotationView(withIdentifier: pinID)
+            if pinAnnotationView == nil {
+                pinAnnotationView = MKPinAnnotationView(annotation: annotation, reuseIdentifier: pinID)
+            }
+
+            pinAnnotationView?.annotation = touristAnnotation
+
+            return pinAnnotationView
+        }
+        return nil
+    }
+}
+
+//MARK: Fetched Results Controller Delegate
 extension MapViewController : NSFetchedResultsControllerDelegate {
     func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange anObject: Any, at indexPath: IndexPath?, for type: NSFetchedResultsChangeType, newIndexPath: IndexPath?) {
         switch type {
         case .insert:
-            let pin = fetchedResultsController.object(at: newIndexPath!)
-            let annotation = MKPointAnnotation()
-            annotation.coordinate.latitude = pin.latitude
-            annotation.coordinate.longitude = pin.longitude
-            mapView.addAnnotation(annotation)
+            if let pin = controller.object(at: newIndexPath!) as? Pin {
+                let annotation = TouristAnnotation()
+                annotation.coordinate.latitude = pin.latitude
+                annotation.coordinate.longitude = pin.longitude
+                annotation.indexPath = newIndexPath!
+                let pinAnnotationView = MKPinAnnotationView(annotation: annotation, reuseIdentifier: pinID)
+                mapView.addAnnotation(pinAnnotationView.annotation!)
+            }
+            
+//            let pin = fetchedResultsController.object(at: newIndexPath!)
+//            let annotation = TouristAnnotation()
+//            annotation.coordinate.latitude = pin.latitude
+//            annotation.coordinate.longitude = pin.longitude
+//            annotation.indexPath = newIndexPath
+//
+//            let pinAnnotationView = MKPinAnnotationView(annotation: annotation, reuseIdentifier: pinID)
+//            mapView.addAnnotation(pinAnnotationView.annotation!)
             break
         case .delete:
             break
@@ -112,5 +176,6 @@ extension MapViewController : NSFetchedResultsControllerDelegate {
             ()
         }
     }
+
     
 }

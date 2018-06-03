@@ -7,9 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		62B9B7F020C0B1B900A034F7 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 62B9B7EE20C0B1B900A034F7 /* Main.storyboard */; };
-		62B9B7F220C0B1BC00A034F7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 62B9B7F120C0B1BC00A034F7 /* Assets.xcassets */; };
-		62B9B7F520C0B1BC00A034F7 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 62B9B7F320C0B1BC00A034F7 /* LaunchScreen.storyboard */; };
+		6259118920C432D9000B2BA0 /* TouristAnnotation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6259118820C432D9000B2BA0 /* TouristAnnotation.swift */; };
+		6259118D20C45C30000B2BA0 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 62B9B7EE20C0B1B900A034F7 /* Main.storyboard */; };
+		6259118E20C45C3A000B2BA0 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 62B9B7F320C0B1BC00A034F7 /* LaunchScreen.storyboard */; };
+		6259118F20C45C40000B2BA0 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 62B9B7F120C0B1BC00A034F7 /* Assets.xcassets */; };
+		6259119120C46F61000B2BA0 /* PinPhotosViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6259119020C46F61000B2BA0 /* PinPhotosViewController.swift */; };
 		62B9B80820C0C4DF00A034F7 /* MapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62B9B7FC20C0B31500A034F7 /* MapViewController.swift */; };
 		62B9B80920C0C4E500A034F7 /* DataController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62B9B80320C0BD9B00A034F7 /* DataController.swift */; };
 		62B9B80A20C0C4EA00A034F7 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62B9B7EA20C0B1B900A034F7 /* AppDelegate.swift */; };
@@ -17,6 +19,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		6259118820C432D9000B2BA0 /* TouristAnnotation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TouristAnnotation.swift; sourceTree = "<group>"; };
+		6259119020C46F61000B2BA0 /* PinPhotosViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PinPhotosViewController.swift; sourceTree = "<group>"; };
 		62B9B7E720C0B1B900A034F7 /* Virtual Tourist.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Virtual Tourist.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		62B9B7EA20C0B1B900A034F7 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		62B9B7EF20C0B1B900A034F7 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -39,6 +43,41 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		6259118720C432AC000B2BA0 /* Annotation */ = {
+			isa = PBXGroup;
+			children = (
+				6259118820C432D9000B2BA0 /* TouristAnnotation.swift */,
+			);
+			path = Annotation;
+			sourceTree = "<group>";
+		};
+		6259118A20C459CD000B2BA0 /* Assets */ = {
+			isa = PBXGroup;
+			children = (
+				62B9B7EE20C0B1B900A034F7 /* Main.storyboard */,
+				62B9B7F120C0B1BC00A034F7 /* Assets.xcassets */,
+				62B9B7F320C0B1BC00A034F7 /* LaunchScreen.storyboard */,
+			);
+			path = Assets;
+			sourceTree = "<group>";
+		};
+		6259118B20C459EF000B2BA0 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				62B9B7F620C0B1BC00A034F7 /* Info.plist */,
+			);
+			path = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		6259118C20C45A35000B2BA0 /* Controller */ = {
+			isa = PBXGroup;
+			children = (
+				62B9B7FC20C0B31500A034F7 /* MapViewController.swift */,
+				6259119020C46F61000B2BA0 /* PinPhotosViewController.swift */,
+			);
+			path = Controller;
+			sourceTree = "<group>";
+		};
 		62B9B7DE20C0B1B900A034F7 = {
 			isa = PBXGroup;
 			children = (
@@ -60,12 +99,11 @@
 			isa = PBXGroup;
 			children = (
 				62B9B7EA20C0B1B900A034F7 /* AppDelegate.swift */,
-				62B9B80220C0BD6600A034F7 /* View */,
 				62B9B7FE20C0BBD300A034F7 /* Model */,
-				62B9B7EE20C0B1B900A034F7 /* Main.storyboard */,
-				62B9B7F120C0B1BC00A034F7 /* Assets.xcassets */,
-				62B9B7F320C0B1BC00A034F7 /* LaunchScreen.storyboard */,
-				62B9B7F620C0B1BC00A034F7 /* Info.plist */,
+				62B9B80220C0BD6600A034F7 /* View */,
+				6259118C20C45A35000B2BA0 /* Controller */,
+				6259118A20C459CD000B2BA0 /* Assets */,
+				6259118B20C459EF000B2BA0 /* Supporting Files */,
 			);
 			path = "Virtual Tourist";
 			sourceTree = "<group>";
@@ -82,7 +120,7 @@
 		62B9B80220C0BD6600A034F7 /* View */ = {
 			isa = PBXGroup;
 			children = (
-				62B9B7FC20C0B31500A034F7 /* MapViewController.swift */,
+				6259118720C432AC000B2BA0 /* Annotation */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -157,9 +195,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				62B9B7F520C0B1BC00A034F7 /* LaunchScreen.storyboard in Resources */,
-				62B9B7F220C0B1BC00A034F7 /* Assets.xcassets in Resources */,
-				62B9B7F020C0B1B900A034F7 /* Main.storyboard in Resources */,
+				6259118F20C45C40000B2BA0 /* Assets.xcassets in Resources */,
+				6259118E20C45C3A000B2BA0 /* LaunchScreen.storyboard in Resources */,
+				6259118D20C45C30000B2BA0 /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -173,7 +211,9 @@
 				62B9B80E20C0C55A00A034F7 /* VirtualTourist.xcdatamodeld in Sources */,
 				62B9B80A20C0C4EA00A034F7 /* AppDelegate.swift in Sources */,
 				62B9B80920C0C4E500A034F7 /* DataController.swift in Sources */,
+				6259119120C46F61000B2BA0 /* PinPhotosViewController.swift in Sources */,
 				62B9B80820C0C4DF00A034F7 /* MapViewController.swift in Sources */,
+				6259118920C432D9000B2BA0 /* TouristAnnotation.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -319,7 +359,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = CRVTY582ZT;
-				INFOPLIST_FILE = "Virtual Tourist/Info.plist";
+				INFOPLIST_FILE = "$(SRCROOT)/Virtual Tourist/Supporting Files/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -337,7 +377,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = CRVTY582ZT;
-				INFOPLIST_FILE = "Virtual Tourist/Info.plist";
+				INFOPLIST_FILE = "$(SRCROOT)/Virtual Tourist/Supporting Files/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
