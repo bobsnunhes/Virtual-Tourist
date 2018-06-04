@@ -18,6 +18,8 @@ class PinPhotosViewController: UIViewController {
     
     var dataController : DataController!
     var pin: Pin!
+    var photosCollection : [Photo] = [Photo]()
+    var flickrPhotos : [FlickrPhoto] = [FlickrPhoto]()
     var fetchedResultsController : NSFetchedResultsController<Photo>!
     let pinID = "pin"
     let cellID = "photoCell"
@@ -30,6 +32,13 @@ class PinPhotosViewController: UIViewController {
         setupFetchedResultsController()
         
         photosCollectionView.delegate = self
+        photosCollectionView.dataSource = self
+        
+        if (fetchedResultsController.fetchedObjects?.count)! > 0 {
+            photosCollection = fetchedResultsController.fetchedObjects!
+        } else {
+            loadPhotosFromFlickr()
+        }
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -38,10 +47,32 @@ class PinPhotosViewController: UIViewController {
         setupFetchedResultsController()
         
         if let indexPaths = photosCollectionView.indexPathsForSelectedItems {
-            photosCollectionView.deselectItem(at: indexPaths[0], animated: false)
+            if indexPaths.count > 0 {
+                photosCollectionView.deselectItem(at: indexPaths.first!, animated: false)
+            }
+            
             photosCollectionView.reloadData()
         }
         
+    }
+    
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        
+        fetchedResultsController = nil
+    }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        
+        let layout = UICollectionViewFlowLayout()
+        layout.sectionInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
+        layout.minimumLineSpacing = 0
+        layout.minimumInteritemSpacing = 0
+        
+        let width = floor(self.photosCollectionView.frame.size.width / 3)
+        layout.itemSize = CGSize(width: width, height: width)
+        photosCollectionView.collectionViewLayout = layout
     }
     
     func setupPinToMapView() {
@@ -73,17 +104,62 @@ class PinPhotosViewController: UIViewController {
         fatalError("The fetch could not be performed: \(error.localizedDescription)")
         }
     }
+    
+    func loadPhotosFromFlickr() {
+        FlickrClient.sharedInstance().getPhotosFromLocation(pin: pin) { (flickrPhotos, error) in
+            if let error = error {
+                print("loadPhotosFromFlickr error: \(error.localizedDescription)")
+            } else {
+                self.flickrPhotos = flickrPhotos!
+                
+                DispatchQueue.main.async {
+                    self.photosCollectionView.reloadData()
+                }
+            }
+        }
+    }
 }
 //MARK: Collection View Delegate
 extension PinPhotosViewController: UICollectionViewDelegate, UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return fetchedResultsController.sections?[0].numberOfObjects ?? 0
+        if photosCollection.count > 0 {
+            return photosCollection.count
+        } else {
+            return flickrPhotos.count
+        }
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let photo = fetchedResultsController.object(at: indexPath)
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellID, for: indexPath)
-        return cell 
+        var cellImage = UIImage()
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellID, for: indexPath) as! PhotosCollectionViewCell
+        if photosCollection.count > 0 {
+            cellImage = UIImage(data: photosCollection[indexPath.row].image!)!
+            cell.imageView.image = cellImage
+        } else if flickrPhotos.count > 0 {
+            cell.startLoading()
+            print("URL \(flickrPhotos[indexPath.row].url!)")
+            FlickrClient.sharedInstance().taskForGETImage(url: flickrPhotos[indexPath.row].url!) { (data, error) in
+                if error != nil {
+                    print("taskForGETImage error: \(error?.localizedDescription ?? "")")
+                } else {
+                    if let data = data {
+                        if let image = UIImage(data: data) {
+                            DispatchQueue.main.async {
+                                cell.imageView.image = image
+                                let photo = Photo(context: self.dataController.viewContext)
+                                photo.image = data
+                                photo.pin = self.pin
+                                try? self.dataController.viewContext.save()
+                                cell.stopLoading()
+                            }
+                        }
+                    }
+                }
+                
+                
+            }
+        }
+        return cell
     }
 }
 
