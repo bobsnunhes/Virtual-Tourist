@@ -114,7 +114,11 @@
                         <viewLayoutGuide key="safeArea" id="tMw-H7-pHA"/>
                     </view>
                     <navigationItem key="navigationItem" id="Aek-TQ-Dfd">
-                        <barButtonItem key="rightBarButtonItem" title="New Collection" id="65l-Ds-71G"/>
+                        <barButtonItem key="rightBarButtonItem" title="New Collection" id="65l-Ds-71G">
+                            <connections>
+                                <action selector="newCollectionAction:" destination="vvD-1n-Xku" id="0jo-8f-YUo"/>
+                            </connections>
+                        </barButtonItem>
                     </navigationItem>
                     <connections>
                         <outlet property="mapView" destination="ebV-BQ-NWH" id="XBH-27-SLe"/>

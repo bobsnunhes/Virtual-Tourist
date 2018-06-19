@@ -17,7 +17,16 @@ extension FlickrClient {
                 print("Error \(error?.localizedDescription)")
             } else {
                 if let pages = numberOfPages {
-                    let params : [String:Any] = [ParameterKeys.PerPage: 10, ParameterKeys.Format : "json", ParameterKeys.Page : pages, ParameterKeys.Latitude : pin.latitude, ParameterKeys.Longitude : pin.longitude]
+                    let randomNum: UInt32 = arc4random_uniform(UInt32(pages))
+                    let randomPage: Int = Int(randomNum)
+                    
+                    print("RANDOM PAGE= \(randomPage)")
+                    
+                    let params : [String:Any] = [ParameterKeys.PerPage: 10,
+                                                 ParameterKeys.Format : "json",
+                                                 ParameterKeys.Page : randomPage,
+                                                 ParameterKeys.Latitude : pin.latitude,
+                                                 ParameterKeys.Longitude : pin.longitude]
                     
                     let method = Methods.findPhotosByLocation
                     
@@ -25,6 +34,7 @@ extension FlickrClient {
                         if let error = error {
                             completion(nil, error)
                         } else {
+                            print("pages result = \(results)")
                             if let results = results as? [String:AnyObject] {
                                 if let photosSection = results[FlickrClient.JSONResponseKeys.Photos] as? [String:AnyObject] {
                                     print("TOTAL = \(photosSection["total"])")
@@ -52,7 +62,11 @@ extension FlickrClient {
     }
     
     func getMaxPhotoPagesFromLocation(pin: Pin, completion: @escaping (_ numberOfPages: Int?, _ error: NSError?) -> Void) {
-        let params : [String:Any] = [ParameterKeys.PerPage: 10, ParameterKeys.Format : "json", ParameterKeys.Page : 1, ParameterKeys.Latitude : pin.latitude, ParameterKeys.Longitude : pin.longitude]
+        let params : [String:Any] = [ParameterKeys.PerPage: 10,
+                                     ParameterKeys.Format : "json",
+                                     ParameterKeys.Page : 1,
+                                     ParameterKeys.Latitude : pin.latitude,
+                                     ParameterKeys.Longitude : pin.longitude]
 
         let method = Methods.findPhotosByLocation
 

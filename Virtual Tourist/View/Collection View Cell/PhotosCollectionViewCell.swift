@@ -20,8 +20,10 @@ class PhotosCollectionViewCell: UICollectionViewCell {
     
     override func prepareForReuse() {
         super.prepareForReuse()
-        startLoading()
+        self.isUserInteractionEnabled = false
+        self.imageView.image = nil
     }
+    
     
     func startLoading() {
         activityItem.startAnimating()

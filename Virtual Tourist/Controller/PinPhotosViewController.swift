@@ -77,15 +77,19 @@ class PinPhotosViewController: UIViewController {
     
     func setupPinToMapView() {
         mapView.delegate = self
+        mapView.isUserInteractionEnabled = false
         
-        let annotation = TouristAnnotation()
-        annotation.coordinate.latitude = pin.latitude
-        annotation.coordinate.longitude = pin.longitude
-        mapView.addAnnotation(annotation)
+        DispatchQueue.main.async {
+            let annotation = TouristAnnotation()
+            annotation.coordinate.latitude = self.pin.latitude
+            annotation.coordinate.longitude = self.pin.longitude
+            self.mapView.addAnnotation(annotation)
+            
+            let regionRadius : CLLocationDistance = 9999
+            let coordRegion = MKCoordinateRegionMakeWithDistance(CLLocationCoordinate2D(latitude: self.pin.latitude, longitude: self.pin.longitude), regionRadius, regionRadius)
+            self.mapView.setRegion(coordRegion, animated: true)
+        }
         
-        let regionRadius : CLLocationDistance = 500
-        let coordRegion = MKCoordinateRegionMakeWithDistance(CLLocationCoordinate2D(latitude: pin.latitude, longitude: pin.longitude), regionRadius, regionRadius)
-        mapView.setRegion(coordRegion, animated: true)
     }
     
     func setupFetchedResultsController() {
@@ -96,12 +100,12 @@ class PinPhotosViewController: UIViewController {
         fetchRequest.sortDescriptors = [sortDescriptor]
         
         fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: dataController.viewContext, sectionNameKeyPath: nil, cacheName: "\(pin)-photos")
-        fetchedResultsController.delegate = self
+        
         
         do {
         try fetchedResultsController.performFetch()
         } catch {
-        fatalError("The fetch could not be performed: \(error.localizedDescription)")
+            fatalError("The fetch could not be performed: \(error.localizedDescription)")
         }
     }
     
@@ -110,6 +114,10 @@ class PinPhotosViewController: UIViewController {
             if let error = error {
                 print("loadPhotosFromFlickr error: \(error.localizedDescription)")
             } else {
+                if self.flickrPhotos.count > 0 {
+                    self.flickrPhotos.removeAll()
+                }
+                
                 self.flickrPhotos = flickrPhotos!
                 
                 DispatchQueue.main.async {
@@ -118,25 +126,59 @@ class PinPhotosViewController: UIViewController {
             }
         }
     }
+    
+    @IBAction func newCollectionAction(_ sender: Any) {
+        if photosCollection.count > 0 {
+            
+            if flickrPhotos.count > 0 {
+                flickrPhotos.removeAll()
+            }
+            
+            for photo in photosCollection {
+                dataController.viewContext.delete(photo)
+                try? dataController.viewContext.save()
+            }
+            photosCollection.removeAll()
+            
+            DispatchQueue.main.async {
+                self.photosCollectionView.reloadData()
+            }
+        }
+        
+        loadPhotosFromFlickr()
+    }
+    
 }
 //MARK: Collection View Delegate
 extension PinPhotosViewController: UICollectionViewDelegate, UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        var count : Int!
         if photosCollection.count > 0 {
-            return photosCollection.count
+            count = photosCollection.count
         } else {
-            return flickrPhotos.count
+            count = flickrPhotos.count
         }
+        
+        return count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         var cellImage = UIImage()
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellID, for: indexPath) as! PhotosCollectionViewCell
+        
         if photosCollection.count > 0 {
-            cellImage = UIImage(data: photosCollection[indexPath.row].image!)!
-            cell.imageView.image = cellImage
+            DispatchQueue.main.async {
+                cell.imageView.backgroundColor = UIColor.yellow
+                cellImage = UIImage(data: self.photosCollection[indexPath.row].image!)!
+                cell.imageView.image = cellImage
+                cell.isUserInteractionEnabled = true
+            }
         } else if flickrPhotos.count > 0 {
-            cell.startLoading()
+            DispatchQueue.main.async {
+                cell.imageView.backgroundColor = UIColor.yellow
+                cell.startLoading()
+            }
+            
             print("URL \(flickrPhotos[indexPath.row].url!)")
             FlickrClient.sharedInstance().taskForGETImage(url: flickrPhotos[indexPath.row].url!) { (data, error) in
                 if error != nil {
@@ -151,16 +193,37 @@ extension PinPhotosViewController: UICollectionViewDelegate, UICollectionViewDat
                                 photo.pin = self.pin
                                 try? self.dataController.viewContext.save()
                                 cell.stopLoading()
+                                self.photosCollection.append(photo)
+                                cell.isUserInteractionEnabled = true
                             }
                         }
                     }
                 }
-                
-                
             }
         }
         return cell
     }
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        if flickrPhotos.count > 0 {
+            flickrPhotos.removeAll()
+        }
+        
+        //Remove from Core Data
+        let photo = photosCollection[indexPath.item]
+        
+        dataController.viewContext.delete(photo)
+        try? dataController.viewContext.save()
+
+        //remove from array
+        if photosCollection.count > 0 {
+            photosCollection.remove(at: indexPath.item)
+        }
+        
+        collectionView.deleteItems(at: [indexPath])
+    }
+    
+    
 }
 
 
@@ -179,9 +242,4 @@ extension PinPhotosViewController: MKMapViewDelegate {
         }
         return nil
     }
-}
-
-//MARK: Fetched Results Controller Delegate
-extension PinPhotosViewController: NSFetchedResultsControllerDelegate {
-    
 }

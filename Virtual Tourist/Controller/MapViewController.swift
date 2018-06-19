@@ -145,7 +145,6 @@ extension MapViewController : NSFetchedResultsControllerDelegate {
         switch type {
         case .insert:
             if let pin = controller.object(at: newIndexPath!) as? Pin {
-                let indexPath = fetchedResultsController.indexPath(forObject: pin)
                 let annotation = TouristAnnotation()
                 annotation.coordinate.latitude = pin.latitude
                 annotation.coordinate.longitude = pin.longitude
@@ -153,15 +152,6 @@ extension MapViewController : NSFetchedResultsControllerDelegate {
                 let pinAnnotationView = MKPinAnnotationView(annotation: annotation, reuseIdentifier: pinID)
                 mapView.addAnnotation(pinAnnotationView.annotation!)
             }
-            
-//            let pin = fetchedResultsController.object(at: newIndexPath!)
-//            let annotation = TouristAnnotation()
-//            annotation.coordinate.latitude = pin.latitude
-//            annotation.coordinate.longitude = pin.longitude
-//            annotation.indexPath = newIndexPath
-//
-//            let pinAnnotationView = MKPinAnnotationView(annotation: annotation, reuseIdentifier: pinID)
-//            mapView.addAnnotation(pinAnnotationView.annotation!)
             break
         case .delete:
             break
