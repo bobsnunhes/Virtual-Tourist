@@ -14,15 +14,19 @@ extension FlickrClient {
         
         getMaxPhotoPagesFromLocation(pin: pin) { (numberOfPages, error) in
             if error != nil {
-                print("Error \(error?.localizedDescription)")
+                debugPrint(error?.localizedDescription ?? error?.localizedFailureReason ?? "")
+                completion(nil, error)
             } else {
                 if let pages = numberOfPages {
-                    let randomNum: UInt32 = arc4random_uniform(UInt32(pages))
+                    debugPrint("pages = \(pages)")
+                    let maxPages = min(pages, 4000)
+                    debugPrint("minPages = \(maxPages)")
+                    let randomNum: UInt32 = arc4random_uniform(UInt32(maxPages))
                     let randomPage: Int = Int(randomNum)
+                    debugPrint("randomPage = \(randomPage)")
                     
-                    print("RANDOM PAGE= \(randomPage)")
                     
-                    let params : [String:Any] = [ParameterKeys.PerPage: 10,
+                    let params : [String:Any] = [ParameterKeys.PerPage: 12,
                                                  ParameterKeys.Format : "json",
                                                  ParameterKeys.Page : randomPage,
                                                  ParameterKeys.Latitude : pin.latitude,
@@ -34,10 +38,8 @@ extension FlickrClient {
                         if let error = error {
                             completion(nil, error)
                         } else {
-                            print("pages result = \(results)")
                             if let results = results as? [String:AnyObject] {
                                 if let photosSection = results[FlickrClient.JSONResponseKeys.Photos] as? [String:AnyObject] {
-                                    print("TOTAL = \(photosSection["total"])")
                                     if let photos = photosSection[FlickrClient.JSONResponseKeys.Photo] as? [[String:AnyObject]] {
                                         var flickrPhotos : [FlickrPhoto] = [FlickrPhoto]()
                                         for photo in photos {

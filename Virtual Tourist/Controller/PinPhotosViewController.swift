@@ -112,15 +112,13 @@ class PinPhotosViewController: UIViewController {
     func loadPhotosFromFlickr() {
         FlickrClient.sharedInstance().getPhotosFromLocation(pin: pin) { (flickrPhotos, error) in
             if let error = error {
-                print("loadPhotosFromFlickr error: \(error.localizedDescription)")
+                debugPrint("loadPhotosFromFlickr error: \(error.localizedDescription)")
             } else {
-                if self.flickrPhotos.count > 0 {
-                    self.flickrPhotos.removeAll()
-                }
-                
-                self.flickrPhotos = flickrPhotos!
-                
                 DispatchQueue.main.async {
+                    self.flickrPhotos.removeAll()
+                    
+                    self.flickrPhotos = flickrPhotos!
+                    
                     self.photosCollectionView.reloadData()
                 }
             }
@@ -179,7 +177,7 @@ extension PinPhotosViewController: UICollectionViewDelegate, UICollectionViewDat
                 cell.startLoading()
             }
             
-            print("URL \(flickrPhotos[indexPath.row].url!)")
+            debugPrint("URL = \(flickrPhotos[indexPath.row].url!)")
             FlickrClient.sharedInstance().taskForGETImage(url: flickrPhotos[indexPath.row].url!) { (data, error) in
                 if error != nil {
                     print("taskForGETImage error: \(error?.localizedDescription ?? "")")
