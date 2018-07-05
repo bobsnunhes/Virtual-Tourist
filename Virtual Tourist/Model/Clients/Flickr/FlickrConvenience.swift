@@ -19,7 +19,7 @@ extension FlickrClient {
             } else {
                 if let pages = numberOfPages {
                     debugPrint("pages = \(pages)")
-                    let maxPages = min(pages, 4000)
+                    let maxPages = min(pages, 4000 / 12)
                     debugPrint("minPages = \(maxPages)")
                     let randomNum: UInt32 = arc4random_uniform(UInt32(maxPages))
                     let randomPage: Int = Int(randomNum)
